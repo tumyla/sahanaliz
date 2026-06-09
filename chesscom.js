@@ -165,3 +165,67 @@ function finalizePgn(chess) {
   };
   return game;
 }
+
+/* ----------------------- official public API (by user) ------------------ */
+// api.chess.com/pub is CORS-enabled, so the browser can call it directly —
+// no proxy, reliable. Indexed by username + month.
+
+function parseUsername(input) {
+  const s = (input || '').trim();
+  let m = s.match(/chess\.com\/(?:member|members)\/([A-Za-z0-9_]+)/i);
+  if (m) return m[1].toLowerCase();
+  m = s.match(/^@?([A-Za-z0-9_]{2,30})$/);
+  if (m) return m[1].toLowerCase();
+  return null;
+}
+
+function resultFromApi(g) {
+  if (g.white && g.white.result === 'win') return '1-0';
+  if (g.black && g.black.result === 'win') return '0-1';
+  return '½-½';
+}
+
+// Fetch a player's recent games (newest first). Returns compact rows incl. PGN.
+export async function fetchPlayerGames(input, onStatus) {
+  const u = parseUsername(input);
+  if (!u) throw new Error('Geçerli bir kullanıcı adı gir (örn. magnuscarlsen).');
+
+  if (onStatus) onStatus('Oyuncu aranıyor…');
+  let archRes;
+  try { archRes = await fetch('https://api.chess.com/pub/player/' + u + '/games/archives', { headers: { Accept: 'application/json' } }); }
+  catch (e) { throw new Error('chess.com API\u2019sine ulaşılamadı. İnternet bağlantını kontrol et ya da PGN yapıştır.'); }
+  if (archRes.status === 404) throw new Error('"' + u + '" adlı oyuncu bulunamadı. Kullanıcı adını kontrol et.');
+  if (!archRes.ok) throw new Error('chess.com API yanıt vermedi (' + archRes.status + '). PGN yapıştırmayı dene.');
+
+  const arch = await archRes.json();
+  const months = arch.archives || [];
+  if (!months.length) throw new Error('"' + u + '" için herkese açık oyun bulunamadı.');
+
+  let all = [];
+  for (let k = months.length - 1; k >= 0 && k >= months.length - 6 && all.length < 30; k--) {
+    if (onStatus) onStatus('Oyunlar getiriliyor…');
+    try {
+      const r = await fetch(months[k], { headers: { Accept: 'application/json' } });
+      if (!r.ok) continue;
+      const j = await r.json();
+      if (j.games && j.games.length) all = all.concat(j.games);
+    } catch (e) { /* skip month */ }
+  }
+  if (!all.length) throw new Error('"' + u + '" için oyun bulunamadı. PGN yapıştırmayı dene.');
+
+  const seen = new Set();
+  all = all.filter((g) => { const k = g.url || ((g.white && g.white.username) + '-' + g.end_time); if (seen.has(k)) return false; seen.add(k); return true; });
+  all.sort((a, b) => (b.end_time || 0) - (a.end_time || 0));
+  return all.slice(0, 30).map((g) => ({
+    white: (g.white && g.white.username) || 'Beyaz',
+    black: (g.black && g.black.username) || 'Siyah',
+    whiteElo: (g.white && g.white.rating) || '',
+    blackElo: (g.black && g.black.rating) || '',
+    result: resultFromApi(g),
+    timeClass: g.time_class || '',
+    endTime: g.end_time || 0,
+    rated: !!g.rated,
+    pgn: g.pgn || '',
+    url: g.url || '',
+  })).filter((x) => x.pgn);
+}

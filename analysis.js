@@ -49,23 +49,22 @@ export function classifyMove(o) {
   const loss = Math.max(0, winBefore - winAfter);
 
   if (isBest) {
-    // Brilliant: a sound sacrifice that stays good for the mover.
-    // - if not already crushing: any real sacrifice (>=1.5) qualifies
-    // - if already winning: needs a bigger sacrifice (>=2.0, i.e. a piece+)
-    const realSac = sacAmount >= 1.5;
-    const bigSac = sacAmount >= 2.0;
-    if (winAfter >= 48 && (winBefore < 90 ? realSac : bigSac)) return 'brilliant';
+    // Brilliant: a genuine sacrifice that stays good for the mover.
+    // - not yet winning: needs a piece-level sac (>=2) and to stay at least equal
+    // - already winning: needs a clearly bigger sac (>=2.5) and to stay clearly on top
+    const okSac = winBefore < 88 ? (sacAmount >= 2.0 && winAfter >= 50) : (sacAmount >= 2.5 && winAfter >= 60);
+    if (okSac) return 'brilliant';
     // Great: clearly the single strong move (big gap to the 2nd-best).
     if (pv2WinBefore != null && (winBefore - pv2WinBefore) >= 12 && winBefore >= 20 && winBefore <= 92) return 'great';
     return 'best';
   }
 
-  if (loss <= 2) return 'excellent';
-  if (loss <= 5) return 'good';
-  if (loss <= 10) return 'inaccuracy';
+  if (loss <= 3) return 'excellent';
+  if (loss <= 6) return 'good';
+  if (loss <= 12) return 'inaccuracy';
 
   const missCond = winBefore >= 55 && afterCpMover > -120; // was better, didn't fall into a lost game
-  if (loss <= 20) return missCond ? 'miss' : 'mistake';
+  if (loss <= 22) return missCond ? 'miss' : 'mistake';
   return missCond ? 'miss' : 'blunder';
 }
 

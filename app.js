@@ -2,7 +2,7 @@
 
 import { Chess } from './chess.js';
 import { Engine } from './engine.js';
-import { fetchChessComGame, loadPgnGame } from './chesscom.js';
+import { fetchChessComGame, loadPgnGame, fetchPlayerGames } from './chesscom.js';
 import { CLASS, cpToWin, moveAccuracy, materialWhiteMinusBlack, classifyMove, analyzeOpenings, MATE_CP } from './analysis.js';
 import { PIECES } from './pieces.js';
 
@@ -50,6 +50,7 @@ const SAMPLE_PGN = `[Event "Paris Opera"]
 /* ------------------------------ UI: panes ----------------------------- */
 function setMode(mode) {
   document.querySelectorAll('#seg button').forEach((b) => b.classList.toggle('active', b.dataset.mode === mode));
+  $('pane-user').style.display = mode === 'user' ? '' : 'none';
   $('pane-link').style.display = mode === 'link' ? '' : 'none';
   $('pane-pgn').style.display = mode === 'pgn' ? '' : 'none';
 }
@@ -530,6 +531,49 @@ function handlePgn() {
   catch (e) { showError('PGN okunamadı. Tam ve geçerli bir PGN yapıştırdığından emin ol.'); }
 }
 
+const TC_TR = { bullet: 'Bullet', blitz: 'Blitz', rapid: 'Rapid', daily: 'Günlük' };
+function fmtDate(ts) { if (!ts) return ''; try { return new Date(ts * 1000).toLocaleDateString('tr-TR'); } catch (e) { return ''; } }
+
+function renderUserGames(list) {
+  const box = $('userGames');
+  box.innerHTML = '';
+  if (!list.length) { box.innerHTML = '<div class="empty-note">Oyun bulunamadı.</div>'; return; }
+  const note = document.createElement('div'); note.className = 'empty-note'; note.textContent = 'Bir oyuna dokun → analiz başlasın:'; box.appendChild(note);
+  for (const g of list) {
+    const row = document.createElement('div'); row.className = 'ugame';
+    const res = document.createElement('div'); res.className = 'res'; res.textContent = g.result; row.appendChild(res);
+    const who = document.createElement('div'); who.className = 'who';
+    who.innerHTML = '<b>' + esc(g.white) + '</b> <span class="elo">' + (g.whiteElo ? g.whiteElo : '') + '</span> – <b>' + esc(g.black) + '</b> <span class="elo">' + (g.blackElo ? g.blackElo : '') + '</span>';
+    row.appendChild(who);
+    const tags = document.createElement('div'); tags.className = 'tags';
+    tags.textContent = [TC_TR[g.timeClass] || g.timeClass, fmtDate(g.endTime)].filter(Boolean).join(' · ');
+    row.appendChild(tags);
+    row.addEventListener('click', () => loadApiGame(g));
+    box.appendChild(row);
+  }
+}
+
+function loadApiGame(g) {
+  clearError();
+  try { startGame(loadPgnGame(g.pgn)); }
+  catch (e) { showError('Bu oyun yüklenemedi. Başka bir oyun seç ya da PGN yapıştır.'); }
+}
+
+async function handleUser() {
+  const name = $('userInput').value;
+  if (!name.trim()) { showError('Önce chess.com kullanıcı adını yaz.'); return; }
+  clearError();
+  const btn = $('goUser'); const orig = btn.innerHTML; btn.disabled = true; btn.innerHTML = '<span>Aranıyor…</span>';
+  $('userGames').innerHTML = '<div class="empty-note">Yükleniyor…</div>';
+  try {
+    const list = await fetchPlayerGames(name, (s) => { btn.innerHTML = '<span>' + esc(s) + '</span>'; });
+    renderUserGames(list);
+  } catch (e) {
+    $('userGames').innerHTML = '';
+    showError(e.message || 'Oyunlar getirilemedi.');
+  } finally { btn.disabled = false; btn.innerHTML = orig; }
+}
+
 function loadSample() { clearError(); try { startGame(loadPgnGame(SAMPLE_PGN)); } catch (e) { showError('Örnek yüklenemedi.'); } }
 
 /* ------------------------------- wiring ------------------------------- */
@@ -540,6 +584,8 @@ function wire() {
     document.querySelectorAll('#depth button').forEach((x) => x.classList.toggle('active', x === b));
     $('depthNote').textContent = DEPTH_NOTE[depthLevel];
   }));
+  $('goUser').addEventListener('click', handleUser);
+  $('userInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') handleUser(); });
   $('goLink').addEventListener('click', handleLink);
   $('urlInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') handleLink(); });
   $('goPgn').addEventListener('click', handlePgn);
@@ -564,5 +610,5 @@ function wire() {
 }
 
 wire();
-setMode('link');
+setMode('user');
 $('depthNote').textContent = DEPTH_NOTE[depthLevel];

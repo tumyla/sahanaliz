@@ -35,11 +35,26 @@
 
     <div class="control">
       <div class="seg" id="seg">
-        <button data-mode="link" class="active">🔗 Oyun linki</button>
+        <button data-mode="user" class="active">👤 Kullanıcı adı</button>
         <button data-mode="pgn">📋 PGN yapıştır</button>
+        <button data-mode="link">🔗 Link (deneysel)</button>
       </div>
 
-      <div id="pane-link">
+      <div id="pane-user">
+        <div class="field-row">
+          <input class="in" id="userInput" type="text" autocomplete="off" autocapitalize="none" spellcheck="false"
+            placeholder="chess.com kullanıcı adın (örn. hikaru)">
+          <button class="go" id="goUser"><span>Oyunları getir</span> →</button>
+        </div>
+        <div class="hint">
+          <span>↳</span>
+          <span>Kullanıcı adını yaz, son oyunların aşağıda listelensin; birine dokun, analiz başlasın.
+            <span class="sample" id="sampleLink">Örnek dene</span></span>
+        </div>
+        <div class="ugames" id="userGames"></div>
+      </div>
+
+      <div id="pane-link" style="display:none">
         <div class="field-row">
           <input class="in" id="urlInput" type="text" inputmode="url" autocomplete="off"
             placeholder="https://www.chess.com/game/live/123456789  veya  /game/daily/...">
@@ -47,8 +62,7 @@
         </div>
         <div class="hint">
           <span>↳</span>
-          <span>chess.com'da oyunu aç, adres çubuğundaki bağlantıyı kopyala. Sadece oyun numarasını da yapıştırabilirsin.
-            <span class="sample" id="sampleLink">Örnek dene</span></span>
+          <span>Linkten çekme proxy'lere bağlı, her zaman çalışmayabilir. Garantili yol: <b>Kullanıcı adı</b> veya <b>PGN</b>.</span>
         </div>
       </div>
 

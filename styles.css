@@ -175,6 +175,21 @@ textarea.in { width: 100%; min-height: 120px; resize: vertical; font-family: var
 .sample { color: var(--green-hi); cursor: pointer; }
 .sample:hover { text-decoration: underline; }
 
+.ugames { margin-top: 12px; display: flex; flex-direction: column; gap: 7px; max-height: 320px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--panel-3) transparent; }
+.ugames:empty { display: none; }
+.ugame {
+  display: flex; align-items: center; gap: 10px; cursor: pointer;
+  background: var(--bg-2); border: 1px solid var(--line); border-radius: 10px;
+  padding: 9px 11px; min-height: 44px; transition: border-color .12s, background .12s;
+}
+.ugame:hover { border-color: var(--green); background: var(--panel-2); }
+.ugame .res { font-family: var(--font-mono); font-size: 12px; font-weight: 700; color: var(--text); min-width: 42px; text-align: center; padding: 3px 4px; border-radius: 6px; background: var(--panel-3); }
+.ugame .who { flex: 1; min-width: 0; font-size: 13.5px; color: var(--text); }
+.ugame .who b { font-weight: 600; }
+.ugame .who .elo { color: var(--text-faint); font-size: 12px; }
+.ugame .tags { font-size: 11px; color: var(--text-faint); text-align: right; white-space: nowrap; }
+.ugames .empty-note { color: var(--text-faint); font-size: 12.5px; padding: 4px 2px; }
+
 .err {
   margin-top: 14px; display: none; align-items: flex-start; gap: 10px;
   background: rgba(211,75,70,.1); border: 1px solid rgba(211,75,70,.4);
