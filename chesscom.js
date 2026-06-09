@@ -47,28 +47,33 @@ export function parseGameUrl(input) {
 
 /* ------------------------------ proxy fetch ----------------------------- */
 // chess.com's callback endpoint does not send CORS headers, so we relay
-// through public CORS proxies (with fallbacks).
+// through public CORS proxies. We fire them all in PARALLEL and take the
+// first one that returns a valid game — fast when any works, fails fast when
+// none do.
 const PROXIES = [
-  (u) => 'https://corsproxy.io/?url=' + encodeURIComponent(u),
   (u) => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u),
-  (u) => 'https://thingproxy.freeboard.io/fetch/' + u,
+  (u) => 'https://corsproxy.io/?url=' + encodeURIComponent(u),
   (u) => 'https://api.codetabs.com/v1/proxy/?quest=' + encodeURIComponent(u),
+  (u) => 'https://thingproxy.freeboard.io/fetch/' + u,
+  (u) => 'https://cors.eu.org/' + u,
 ];
 
-async function fetchText(url) {
-  let lastErr;
-  for (const make of PROXIES) {
-    try {
-      const ctrl = new AbortController();
-      const tm = setTimeout(() => ctrl.abort(), 12000);
-      const res = await fetch(make(url), { signal: ctrl.signal });
-      clearTimeout(tm);
-      if (!res.ok) { lastErr = new Error('HTTP ' + res.status); continue; }
-      const text = await res.text();
-      if (text && text.length > 2) return text;
-    } catch (e) { lastErr = e; }
-  }
-  throw lastErr || new Error('proxy failed');
+function attempt(make, apiUrl, ms) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => { try { ctrl.abort(); } catch (e) {} }, ms);
+  return fetch(make(apiUrl), { signal: ctrl.signal })
+    .then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+    .then((text) => {
+      let json; try { json = JSON.parse(text); } catch (e) { throw new Error('not json'); }
+      if (!(json && json.game && json.game.moveList)) throw new Error('no game');
+      return json;
+    })
+    .finally(() => clearTimeout(timer));
+}
+
+function raceProxies(apiUrl, ms) {
+  // Promise.any: resolve with first success; reject only if ALL fail.
+  return Promise.any(PROXIES.map((make) => attempt(make, apiUrl, ms)));
 }
 
 /* --------------------------- build from moves --------------------------- */
@@ -94,20 +99,19 @@ function historyToGame(chess) {
 }
 
 /* ------------------------------ public API ------------------------------ */
-export async function fetchChessComGame(input) {
+export async function fetchChessComGame(input, onStatus) {
   const parsed = parseGameUrl(input);
   if (!parsed) throw new Error('Linkten oyun numarası çıkaramadım. Bağlantıyı kontrol et ya da PGN yapıştır.');
 
   const types = parsed.type === 'daily' ? ['daily', 'live'] : ['live', 'daily'];
   let data = null, usedType = null;
   for (const t of types) {
+    if (onStatus) onStatus(t === 'daily' ? 'Günlük oyun aranıyor…' : 'chess.com\u2019dan oyun çekiliyor…');
     const api = 'https://www.chess.com/callback/' + t + '/game/' + parsed.id;
-    let text;
-    try { text = await fetchText(api); } catch (e) { continue; }
-    let json; try { json = JSON.parse(text); } catch (e) { continue; }
-    if (json && json.game && json.game.moveList) { data = json; usedType = t; break; }
+    try { data = await raceProxies(api, 9000); usedType = t; break; }
+    catch (e) { /* try next type */ }
   }
-  if (!data) throw new Error('Oyun çekilemedi. Oyun gizli olabilir veya proxy geçici olarak engelli. PGN yapıştırmayı dene — her zaman çalışır.');
+  if (!data) throw new Error('Oyun çekilemedi — chess.com bağlantısı (proxy üzerinden) şu an yanıt vermedi. En garantisi: oyunda Share \u2192 PGN\u2019i kopyalayıp PGN sekmesine yapıştırmak.');
 
   const g = data.game;
   const head = g.pgnHeaders || {};
@@ -133,7 +137,6 @@ export function loadPgnGame(pgn) {
   const c = new Chess();
   try { c.loadPgn(pgn); }
   catch (e) {
-    // retry: strip annotations/comments/clock that some exports include
     const cleaned = pgn
       .replace(/\{[^}]*\}/g, '')
       .replace(/\$\d+/g, '')

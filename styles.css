@@ -38,6 +38,7 @@
   --c-excellent:  #9fc15f;
   --c-good:       #a7b59b;
   --c-book:       #b08a5a;
+  --c-forced:     #6f8088;
   --c-inaccuracy: #f2c14e;
   --c-mistake:    #e8923a;
   --c-miss:       #e8693a;
@@ -250,13 +251,14 @@ textarea.in { width: 100%; min-height: 120px; resize: vertical; font-family: var
 .sq.dark  .co { color: #e9edcc; }
 
 .pc {
-  font-family: var(--font-piece);
-  font-size: clamp(28px, 9.2vw, 74px); line-height: 1;
-  position: relative; z-index: 2; pointer-events: none;
+  position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  display: flex; align-items: center; justify-content: center;
   animation: pop .18s ease;
 }
-.pc.w { color: #fbfbf8; -webkit-text-stroke: 1.4px #4c4c47; text-shadow: 0 3px 4px rgba(0,0,0,.34); }
-.pc.b { color: #403e3b; -webkit-text-stroke: 1.2px #1c1b19; text-shadow: 0 2px 3px rgba(0,0,0,.3); }
+.pc svg {
+  width: 88%; height: 88%; display: block;
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,.32));
+}
 
 /* classification badge on destination square */
 .badge {
@@ -286,6 +288,30 @@ textarea.in { width: 100%; min-height: 120px; resize: vertical; font-family: var
 }
 .opening .eco { font-family: var(--font-mono); font-size: 11px; color: var(--c-book); border: 1px solid rgba(176,138,90,.4); background: rgba(176,138,90,.12); padding: 2px 7px; border-radius: 6px; }
 .opening b { color: var(--text); font-weight: 600; }
+
+.moveinfo {
+  margin-top: 12px;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+  padding: 12px 14px; border-left: 4px solid var(--line);
+  animation: rise .2s ease;
+}
+.mi-head { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+.mi-badge {
+  width: 24px; height: 24px; border-radius: 50%; flex: none;
+  display: grid; place-items: center; color: #fff; font-weight: 800;
+  font-size: 12px; line-height: 1; box-shadow: 0 2px 5px rgba(0,0,0,.3);
+}
+.mi-move { font-family: var(--font-display); font-weight: 700; font-size: 17px; color: var(--text); }
+.mi-label { font-weight: 600; font-size: 14px; }
+.mi-why { margin-top: 8px; font-size: 13.5px; line-height: 1.5; color: var(--text-dim); }
+.mi-best {
+  margin-top: 8px; font-size: 13.5px; color: var(--text);
+  background: rgba(129,182,76,.12); border: 1px solid rgba(129,182,76,.32);
+  border-radius: 8px; padding: 7px 10px;
+}
+.mi-best b { color: var(--green-hi); font-family: var(--font-display); }
+.mi-eval { margin-top: 7px; font-family: var(--font-mono); font-size: 12px; color: var(--text-dim); }
+.mi-eval b { color: var(--text); }
 
 /* ---------------------------------------------------------------- sidebar */
 .side { display: flex; flex-direction: column; gap: 16px; position: sticky; top: 74px; }

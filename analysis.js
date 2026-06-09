@@ -12,6 +12,7 @@ export const CLASS = {
   excellent:  { tr: 'Mükemmel',  sym: '✓',  color: 'var(--c-excellent)' },
   good:       { tr: 'İyi',       sym: '✓',  color: 'var(--c-good)' },
   book:       { tr: 'Kitap',     sym: '◆',  color: 'var(--c-book)' },
+  forced:     { tr: 'Zorunlu',   sym: '⊡',  color: 'var(--c-forced)' },
   inaccuracy: { tr: 'Yanlışlık', sym: '?!', color: 'var(--c-inaccuracy)' },
   mistake:    { tr: 'Hata',      sym: '?',  color: 'var(--c-mistake)' },
   miss:       { tr: 'Kaçırılan', sym: '✗',  color: 'var(--c-miss)' },
@@ -41,12 +42,20 @@ export function materialWhiteMinusBlack(fen) {
 }
 
 // Core classifier. All win% values are from the MOVER's perspective.
+// sacAmount = net material (in pawns) the mover gives up after the opponent's
+// best reply (0 if the move is not a sacrifice).
 export function classifyMove(o) {
-  const { isBest, isSac, winBefore, winAfter, pv2WinBefore, afterCpMover } = o;
+  const { isBest, sacAmount, winBefore, winAfter, pv2WinBefore, afterCpMover } = o;
   const loss = Math.max(0, winBefore - winAfter);
 
   if (isBest) {
-    if (isSac && winAfter >= 45 && winBefore < 92 && winBefore > 8) return 'brilliant';
+    // Brilliant: a sound sacrifice that stays good for the mover.
+    // - if not already crushing: any real sacrifice (>=1.5) qualifies
+    // - if already winning: needs a bigger sacrifice (>=2.0, i.e. a piece+)
+    const realSac = sacAmount >= 1.5;
+    const bigSac = sacAmount >= 2.0;
+    if (winAfter >= 48 && (winBefore < 90 ? realSac : bigSac)) return 'brilliant';
+    // Great: clearly the single strong move (big gap to the 2nd-best).
     if (pv2WinBefore != null && (winBefore - pv2WinBefore) >= 12 && winBefore >= 20 && winBefore <= 92) return 'great';
     return 'best';
   }
@@ -61,7 +70,6 @@ export function classifyMove(o) {
 }
 
 // Opening detection over a list of SAN moves (chess.js canonical SAN).
-// Returns { deepestBookPly, name, eco } or null.
 export function analyzeOpenings(sanList) {
   if (!sanList.length) return null;
   const seqAt = [];
@@ -69,7 +77,6 @@ export function analyzeOpenings(sanList) {
   for (let k = 0; k < sanList.length; k++) { acc = k === 0 ? sanList[0] : acc + ' ' + sanList[k]; seqAt[k] = acc; }
   const fullGame = seqAt[seqAt.length - 1];
 
-  // deepest ply that is still "in book" (running sequence is a prefix of some line)
   let deepest = -1;
   const maxCheck = Math.min(sanList.length, 20);
   for (let k = 0; k < maxCheck; k++) {
@@ -83,7 +90,6 @@ export function analyzeOpenings(sanList) {
     if (inBook) deepest = k; else break;
   }
 
-  // name = longest opening line that is a prefix-or-equal of the game
   let name = null, eco = null, bestLen = -1;
   for (let j = 0; j < OPENINGS.length; j++) {
     const os = OPENINGS[j][0];
