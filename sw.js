@@ -4,7 +4,7 @@
 //   - big immutable binaries   -> cache-first (instant, offline): engine + openings
 //   - cross-origin (fonts)     -> stale-while-revalidate
 // Bump VERSION to force a full refresh of the precache.
-const VERSION = 'sahanaliz-v2';
+const VERSION = 'sahanaliz-v3';
 
 const CORE = [
   './', './index.html', './styles.css', './app.js',

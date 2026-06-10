@@ -36,27 +36,33 @@ function clampCp(cp) { return Math.max(-1500, Math.min(1500, cp || 0)); }
 
 // Blended loss (in win% points), from the MOVER's perspective.
 // In contested positions it equals the pure win%-loss (so balanced games are
-// unchanged). In clearly decided positions (win% near 0/100, where win%-loss
-// saturates to ~0) it mixes in a scaled centipawn-loss so that missed wins and
-// mistakes-while-losing still register — closer to chess.com's behaviour.
+// unchanged). The extra centipawn term only kicks in when the position is
+// clearly decided AND the mover is NOT the side that is comfortably winning —
+// i.e. it catches a losing side's drift and thrown-away advantages, while a
+// player who stays clearly ahead is judged leniently on win% (so a comfortable
+// win still scores high and is worth sharing).
 export function effectiveLoss(o) {
   const { winBefore, winAfter, bestCpMover, afterCpMover } = o;
   const winLoss = Math.max(0, winBefore - winAfter);
-  const cpLoss = Math.max(0, clampCp(bestCpMover) - clampCp(afterCpMover));
-  // saturation: 0 while win% is within [25,75], ramping to 1 by win% <=5 or >=95
+  const ac = clampCp(afterCpMover);
+  const cpLoss = Math.max(0, clampCp(bestCpMover) - ac);
+  // decided position? 0 while win% in [25,75], ramping to 1 by win% <=5 or >=95
   const sat = Math.max(0, Math.min(1, (Math.abs(winBefore - 50) - 25) / 20));
-  const cpComponent = Math.min(cpLoss / 12, 50) * sat;
+  // not-clearly-winning weight: 0 when the mover stays clearly ahead (>=+3.0
+  // after the move), ramping to 1 around equality / when losing
+  const behindW = Math.max(0, Math.min(1, (300 - ac) / 300));
+  const cpComponent = Math.min(cpLoss / 12, 45) * sat * behindW;
   return Math.max(winLoss, cpComponent);
 }
 
-// Aggregate per-move accuracies into a game accuracy. Mean of the arithmetic
-// and harmonic means (Lichess-style): bad moves pull the score down harder than
-// a plain average, matching chess.com more closely.
+// Aggregate per-move accuracies into a game accuracy. A weighted mix of the
+// arithmetic and harmonic means: bad moves still pull the score down, but not
+// as harshly as a pure harmonic mean — so a clean game stays high.
 export function aggregateAccuracy(arr) {
   if (!arr || !arr.length) return 0;
   const ari = arr.reduce((s, a) => s + a, 0) / arr.length;
   const harm = arr.length / arr.reduce((s, a) => s + 1 / Math.max(a, 1), 0);
-  return (ari + harm) / 2;
+  return 0.65 * ari + 0.35 * harm;
 }
 
 const VAL = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };
