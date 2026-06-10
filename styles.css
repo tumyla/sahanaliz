@@ -412,3 +412,68 @@ textarea.in { width: 100%; min-height: 120px; resize: vertical; font-family: var
   .gh .meta { width: 100%; }
   .acc .val { font-size: 26px; }
 }
+
+/* ===================== NEW FEATURES (A / C / B) ===================== */
+
+/* language selector */
+.lang-sel {
+  font-size: 13px; color: var(--text-dim); background: var(--bg-2);
+  border: 1px solid var(--line-soft); border-radius: 9px; padding: 7px 10px;
+  cursor: pointer; margin-right: 8px; -webkit-appearance: none; appearance: none;
+}
+.lang-sel:hover { border-color: var(--green); color: var(--text); }
+
+/* mini buttons in card heads (share, simple-mode toggle) */
+.mini-btn {
+  margin-left: auto; font-size: 12px; font-weight: 600; color: var(--text-dim);
+  background: var(--bg-2); border: 1px solid var(--line-soft); border-radius: 8px;
+  padding: 6px 11px; cursor: pointer; transition: .15s; white-space: nowrap;
+}
+.mini-btn:hover { border-color: var(--green); color: var(--text); background: rgba(129,182,76,.08); }
+.mini-btn.toggle.on { border-color: var(--green); color: var(--green-hi); background: rgba(129,182,76,.14); }
+
+/* opening description (#3) */
+.opening { flex-wrap: wrap; }
+.op-desc { flex-basis: 100%; margin-top: 8px; font-size: 12.5px; line-height: 1.5; color: var(--text-dim); }
+
+/* critical moments (#2) */
+.crit-list { display: flex; flex-direction: column; gap: 6px; }
+.crit {
+  display: grid; grid-template-columns: 46px 1fr auto; align-items: center; gap: 8px;
+  background: var(--bg-2); border: 1px solid var(--line); border-radius: 9px;
+  padding: 8px 11px; cursor: pointer; transition: .15s;
+}
+.crit:hover, .crit:focus { border-color: var(--c-mistake); background: var(--panel-2); outline: none; }
+.crit .cno { font-family: var(--font-mono); font-size: 12px; color: var(--text-faint); }
+.crit .csan { display: flex; align-items: center; gap: 7px; font-weight: 600; color: var(--text); }
+.crit .cswing { font-family: var(--font-mono); font-size: 11.5px; color: var(--text-dim); }
+.crit .g { width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-size: 10px; font-weight: 800; flex: none; }
+
+/* simple-mode side filter (#6) */
+.simple-sides { display: flex; gap: 6px; padding: 10px 16px 0; }
+.simple-sides button {
+  font-size: 12px; font-weight: 600; color: var(--text-dim);
+  background: var(--bg-2); border: 1px solid var(--line); border-radius: 7px;
+  padding: 5px 12px; cursor: pointer; transition: .15s;
+}
+.simple-sides button.active { background: var(--panel-3); color: var(--text); border-color: var(--green); }
+.mrow.simple { grid-template-columns: 46px 1fr; margin-bottom: 4px; }
+.mv.wide { width: 100%; }
+
+/* share modal (#4) */
+.share-modal {
+  position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,.72);
+  display: grid; place-items: center; padding: 18px; animation: fade .15s ease;
+}
+.share-box {
+  background: var(--panel); border: 1px solid var(--line-soft); border-radius: 16px;
+  padding: 14px; max-width: 420px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,.5);
+}
+.share-img { width: 100%; border-radius: 10px; display: block; }
+.share-actions { display: flex; gap: 8px; margin-top: 12px; }
+.share-actions .go { flex: 1; justify-content: center; }
+.share-actions .ghost-btn { flex: 1; text-align: center; }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+
+/* generic empty note (move list / critical list) */
+.empty-note { color: var(--text-faint); font-size: 12.5px; padding: 8px 2px; }

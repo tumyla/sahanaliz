@@ -18,38 +18,39 @@
     <div class="logo">♞</div>
     <div>
       <h1>Şah<span>Analiz</span></h1>
-      <div class="tag">sınırsız oyun incelemesi</div>
+      <div class="tag" data-i18n="tagline">sınırsız oyun incelemesi</div>
     </div>
   </div>
   <div class="spacer"></div>
-  <button class="ghost-btn" id="newGameBtn" style="display:none">＋ Yeni analiz</button>
+  <select id="langSel" class="lang-sel" aria-label="Language"></select>
+  <button class="ghost-btn" id="newGameBtn" data-i18n="newAnalysis" style="display:none">＋ Yeni analiz</button>
 </header>
 
 <main class="wrap">
 
   <!-- ============== INTRO / INPUT ============== -->
   <section class="intro" id="intro">
-    <span class="kicker">♟ tarayıcıda çalışır · ücretsiz · sınırsız</span>
-    <h2>Oyununu yapıştır,<br><em>tüm hamleleri</em> çözümle.</h2>
-    <p class="lead">Bir chess.com oyun linkini gir; her hamleyi <b>Muhteşem</b>, <b>En İyi</b>, <b>Gaf</b> gibi etiketlerle değerlendirip doğruluk yüzdesini ve değerlendirme grafiğini çıkarayım. Motor senin cihazında çalışır — yani analiz limiti yok.</p>
+    <span class="kicker" data-i18n="introKicker">♟ tarayıcıda çalışır · ücretsiz · sınırsız</span>
+    <h2 data-i18n-html="introTitle">Oyununu yapıştır,<br><em>tüm hamleleri</em> çözümle.</h2>
+    <p class="lead" data-i18n-html="introLead">Bir chess.com oyun linkini gir; her hamleyi <b>Muhteşem</b>, <b>En İyi</b>, <b>Gaf</b> gibi etiketlerle değerlendirip doğruluk yüzdesini ve değerlendirme grafiğini çıkarayım. Motor senin cihazında çalışır — yani analiz limiti yok.</p>
 
     <div class="control">
       <div class="seg" id="seg">
-        <button data-mode="user" class="active">👤 Kullanıcı adı</button>
-        <button data-mode="pgn">📋 PGN yapıştır</button>
-        <button data-mode="link">🔗 Link (deneysel)</button>
+        <button data-mode="user" class="active" data-i18n="tabUser">👤 Kullanıcı adı</button>
+        <button data-mode="pgn" data-i18n="tabPgn">📋 PGN yapıştır</button>
+        <button data-mode="link" data-i18n="tabLink">🔗 Link (deneysel)</button>
       </div>
 
       <div id="pane-user">
         <div class="field-row">
           <input class="in" id="userInput" type="text" autocomplete="off" autocapitalize="none" spellcheck="false"
-            placeholder="chess.com kullanıcı adın (örn. hikaru)">
-          <button class="go" id="goUser"><span>Oyunları getir</span> →</button>
+            data-i18n-ph="userPh" placeholder="chess.com kullanıcı adın (örn. hikaru)">
+          <button class="go" id="goUser"><span data-i18n="userBtn">Oyunları getir</span> →</button>
         </div>
         <div class="hint">
           <span>↳</span>
-          <span>Kullanıcı adını yaz, son oyunların aşağıda listelensin; birine dokun, analiz başlasın.
-            <span class="sample" id="sampleLink">Örnek dene</span></span>
+          <span><span data-i18n="userHint">Kullanıcı adını yaz, son oyunların aşağıda listelensin; birine dokun, analiz başlasın.</span>
+            <span class="sample" id="sampleLink" data-i18n="sample">Örnek dene</span></span>
         </div>
         <div class="ugames" id="userGames"></div>
       </div>
@@ -57,32 +58,32 @@
       <div id="pane-link" style="display:none">
         <div class="field-row">
           <input class="in" id="urlInput" type="text" inputmode="url" autocomplete="off"
-            placeholder="https://www.chess.com/game/live/123456789  veya  /game/daily/...">
-          <button class="go" id="goLink"><span>Analiz et</span> →</button>
+            data-i18n-ph="linkPh" placeholder="https://www.chess.com/game/live/123456789  veya  /game/daily/...">
+          <button class="go" id="goLink"><span data-i18n="linkBtn">Analiz et</span> →</button>
         </div>
         <div class="hint">
           <span>↳</span>
-          <span>Linkten çekme proxy'lere bağlı, her zaman çalışmayabilir. Garantili yol: <b>Kullanıcı adı</b> veya <b>PGN</b>.</span>
+          <span data-i18n="linkHint">Linkten çekme proxy'lere bağlı, her zaman çalışmayabilir. Garantili yol: Kullanıcı adı veya PGN.</span>
         </div>
       </div>
 
       <div id="pane-pgn" style="display:none">
-        <textarea class="in" id="pgnInput" placeholder="[Event &quot;...&quot;]
+        <textarea class="in" id="pgnInput" data-i18n-ph="pgnPh" placeholder="[Event &quot;...&quot;]
 1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 ...
 
 PGN metnini buraya yapıştır (chess.com → Paylaş → PGN)."></textarea>
         <div class="field-row" style="margin-top:10px">
           <span style="flex:1"></span>
-          <button class="go" id="goPgn"><span>Analiz et</span> →</button>
+          <button class="go" id="goPgn"><span data-i18n="pgnBtn">Analiz et</span> →</button>
         </div>
       </div>
 
       <div class="opts">
-        <span class="opt-label">Motor derinliği:</span>
+        <span class="opt-label" data-i18n="depthLabel">Motor derinliği:</span>
         <div class="depth" id="depth">
-          <button data-d="fast">Hızlı</button>
-          <button data-d="balanced" class="active">Dengeli</button>
-          <button data-d="deep">Derin</button>
+          <button data-d="fast" data-i18n="depthFast">Hızlı</button>
+          <button data-d="balanced" class="active" data-i18n="depthBalanced">Dengeli</button>
+          <button data-d="deep" data-i18n="depthDeep">Derin</button>
         </div>
         <span class="opt-label" id="depthNote" style="margin-left:2px">~ orta hız, iyi doğruluk</span>
       </div>
@@ -91,10 +92,10 @@ PGN metnini buraya yapıştır (chess.com → Paylaş → PGN)."></textarea>
     </div>
 
     <div class="feats">
-      <div class="feat"><span class="d"></span><span><b>10 etiket</b> · Muhteşem→Gaf</span></div>
-      <div class="feat"><span class="d"></span><span><b>Doğruluk %</b> her iki taraf</span></div>
-      <div class="feat"><span class="d"></span><span><b>Değerlendirme grafiği</b></span></div>
-      <div class="feat"><span class="d"></span><span><b>Açılış</b> ismi + ECO</span></div>
+      <div class="feat"><span class="d"></span><span data-i18n-html="feat1"><b>10 etiket</b> · Muhteşem→Gaf</span></div>
+      <div class="feat"><span class="d"></span><span data-i18n-html="feat2"><b>Doğruluk %</b> her iki taraf</span></div>
+      <div class="feat"><span class="d"></span><span data-i18n-html="feat3"><b>Değerlendirme grafiği</b></span></div>
+      <div class="feat"><span class="d"></span><span data-i18n-html="feat4"><b>Açılış</b> ismi + ECO</span></div>
     </div>
   </section>
 
@@ -123,19 +124,20 @@ PGN metnini buraya yapıştır (chess.com → Paylaş → PGN)."></textarea>
 
         <div class="nav">
           <div class="grp">
-            <button class="ctrl" id="navStart" title="Başa (↑)">⏮</button>
-            <button class="ctrl" id="navPrev"  title="Geri (←)">◀</button>
-            <button class="ctrl" id="navNext"  title="İleri (→)">▶</button>
-            <button class="ctrl" id="navEnd"   title="Sona (↓)">⏭</button>
+            <button class="ctrl" id="navStart" data-i18n-title="navStart" title="Başa (↑)">⏮</button>
+            <button class="ctrl" id="navPrev"  data-i18n-title="navPrev" title="Geri (←)">◀</button>
+            <button class="ctrl" id="navNext"  data-i18n-title="navNext" title="İleri (→)">▶</button>
+            <button class="ctrl" id="navEnd"   data-i18n-title="navEnd" title="Sona (↓)">⏭</button>
           </div>
           <div class="grp flip">
-            <button class="ctrl" id="navFlip" title="Tahtayı çevir">⇅</button>
+            <button class="ctrl" id="navFlip" data-i18n-title="navFlip" title="Tahtayı çevir">⇅</button>
           </div>
         </div>
 
         <div class="opening" id="openingBox" style="display:none">
           <span class="eco" id="openingEco">A00</span>
           <span><b id="openingName">—</b></span>
+          <div class="op-desc" id="openingDesc"></div>
         </div>
 
         <div class="moveinfo" id="moveInfo" style="display:none">
@@ -154,7 +156,7 @@ PGN metnini buraya yapıştır (chess.com → Paylaş → PGN)."></textarea>
       <aside class="side">
 
         <div class="card" id="progCard">
-          <div class="head"><span class="ico">⚙</span><h3>Analiz ediliyor</h3></div>
+          <div class="head"><span class="ico">⚙</span><h3 data-i18n="progTitle">Analiz ediliyor</h3></div>
           <div class="prog">
             <div class="lab"><span id="progText">Hazırlanıyor…</span><span id="progPct">0%</span></div>
             <div class="bar"><i id="progFill"></i></div>
@@ -163,42 +165,54 @@ PGN metnini buraya yapıştır (chess.com → Paylaş → PGN)."></textarea>
         </div>
 
         <div class="card review" id="reviewCard" style="display:none">
-          <div class="head"><span class="ico">📊</span><h3>Oyun İncelemesi</h3></div>
+          <div class="head"><span class="ico">📊</span><h3 data-i18n="reviewTitle">Oyun İncelemesi</h3>
+            <button class="mini-btn" id="shareBtn" data-i18n="shareBtn">📷 Görsel oluştur</button></div>
           <div class="body">
             <div class="acc-row">
               <div class="acc">
                 <div class="who" id="accWhoW">Beyaz</div>
                 <div class="val" id="accW">—</div>
-                <div class="v-lbl">doğruluk</div>
+                <div class="v-lbl" data-i18n="accuracy">doğruluk</div>
               </div>
               <div class="acc-mid">
                 <div class="dot">♟</div>
-                <div class="mid">vs</div>
+                <div class="mid" data-i18n="vs">vs</div>
               </div>
               <div class="acc">
                 <div class="who" id="accWhoB">Siyah</div>
                 <div class="val" id="accB">—</div>
-                <div class="v-lbl">doğruluk</div>
+                <div class="v-lbl" data-i18n="accuracy">doğruluk</div>
               </div>
             </div>
             <div class="counts" id="counts"><!-- filled by JS --></div>
           </div>
         </div>
 
+        <div class="card critical" id="criticalCard" style="display:none">
+          <div class="head"><h3 data-i18n="criticalTitle">⚡ Kritik Anlar</h3></div>
+          <div class="body"><div class="crit-list" id="criticalList"></div></div>
+        </div>
+
         <div class="card graph" id="graphCard" style="display:none">
-          <div class="head"><span class="ico">📈</span><h3>Değerlendirme</h3></div>
+          <div class="head"><span class="ico">📈</span><h3 data-i18n="graphTitle">Değerlendirme</h3></div>
           <div class="body"><div id="graphHolder"></div></div>
         </div>
 
         <div class="card moves" id="movesCard" style="display:none">
-          <div class="head"><span class="ico">≣</span><h3>Hamleler</h3></div>
+          <div class="head"><span class="ico">≣</span><h3 data-i18n="movesTitle">Hamleler</h3>
+            <button class="mini-btn toggle" id="simpleToggle" data-i18n="simpleMode">Basit mod — sadece hatalar</button></div>
+          <div class="simple-sides" id="simpleSides" style="display:none">
+            <button data-side="all" class="active" data-i18n="sideAll">İkisi</button>
+            <button data-side="w" data-i18n="sideWhite">Beyaz</button>
+            <button data-side="b" data-i18n="sideBlack">Siyah</button>
+          </div>
           <div class="body" id="moveList"></div>
         </div>
 
       </aside>
     </div>
 
-    <div class="foot">
+    <div class="foot" data-i18n-html="footer2">
       Stockfish 11 tarayıcında çalışır · değerlendirmeler chess.com'a yakındır ama birebir aynı değildir.<br>
       Taşlar: cburnett seti (Colin M.L. Burnett, özgür lisans · Lichess'in de kullandığı set). Sınıflandırma ikonları özgündür. Linkten çekme resmî olmayan bir uçtan yapılır; çalışmazsa <b>PGN yapıştır</b> her zaman çalışır.
     </div>
